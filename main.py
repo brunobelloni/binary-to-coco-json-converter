@@ -1,8 +1,7 @@
 import glob
+
 import json
 import os
-
-from skimage import io
 
 from src.create_annotations import *
 
@@ -21,32 +20,23 @@ def images_annotations_info(maskpath):
     annotations = []
     images = []
 
-    for mask_image in glob.glob(os.path.join(maskpath, '**', "*.tif")):
-        original_file_name = os.path.basename(mask_image).split(".")[0] + ".jpg"
+    for category in category_ids.keys():
+        for mask_image in glob.glob(os.path.join(maskpath, category, "*.tif")):
+            original_file_name = os.path.basename(mask_image).split(".")[0] + ".jpg"
+            mask_image_open = cv2.imread(mask_image)
+            w, h, c = mask_image_open.shape
 
-        # Open the image and (to be sure) we convert it to RGB
-        mask_image_open = io.imread(mask_image)
-        w, h = mask_image_open.shape
+            if original_file_name not in map(lambda img: img['file_name'], images):
+                image = create_image_annotation(original_file_name, w, h)
+                images.append(image)
 
-        # "images" info
-        if original_file_name not in map(lambda img: img['file_name'], images):
-            image = create_image_annotation(original_file_name, w, h)
-            images.append(image)
-        else:
-            image = [element for element in images if element['file_name'] == original_file_name][0]
+            contours = find_contours(mask_image_open)
 
-        # sub_masks = create_sub_masks(mask_image_open, w, h)
-        category_id = category_ids[mask_image.split('/')[2]]
+            for contour in contours:
+                annotation = create_annotation_format(contour, category_ids[category], annotation_id)
+                annotations.append(annotation)
+                annotation_id += 1
 
-        # "annotations" info
-        polygons, segmentations = create_sub_mask_annotation(mask_image_open)
-
-        for polygon in polygons:
-            # Cleaner to recalculate this variable
-            segmentation = [np.array(polygon.exterior.coords).ravel().tolist()]
-            annotation = create_annotation_format(polygon, segmentation, image['id'], category_id, annotation_id)
-            annotations.append(annotation)
-            annotation_id += 1
     return images, annotations, annotation_id
 
 
