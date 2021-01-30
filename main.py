@@ -29,11 +29,13 @@ def images_annotations_info(maskpath):
             if original_file_name not in map(lambda img: img['file_name'], images):
                 image = create_image_annotation(original_file_name, w, h)
                 images.append(image)
+            else:
+                image = [element for element in images if element['file_name'] == original_file_name][0]
 
             contours = find_contours(mask_image_open)
 
             for contour in contours:
-                annotation = create_annotation_format(contour, category_ids[category], annotation_id)
+                annotation = create_annotation_format(contour, image['id'], category_ids[category], annotation_id)
                 annotations.append(annotation)
                 annotation_id += 1
 

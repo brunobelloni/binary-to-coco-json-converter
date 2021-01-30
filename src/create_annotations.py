@@ -37,11 +37,11 @@ def create_image_annotation(file_name, width, height):
     return images
 
 
-def create_annotation_format(contour, category_id, annotation_id):
+def create_annotation_format(contour, image_id_, category_id, annotation_id):
     annotation = {
         "iscrowd": 0,
         "id": annotation_id,
-        "image_id": image_id,
+        "image_id": image_id_,
         "category_id": category_id,
         "bbox": cv2.boundingRect(contour),
         "area": cv2.contourArea(contour),
