@@ -1,5 +1,4 @@
 import glob
-
 import json
 import os
 
@@ -7,10 +6,10 @@ from src.create_annotations import *
 
 # Label ids of the dataset
 category_ids = {
-    "EX": 0,
-    "HE": 1,
-    "SE": 2,
-    "MA": 3,
+    "EX": 1,
+    "HE": 2,
+    "SE": 3,
+    "MA": 4,
 }
 
 
@@ -24,10 +23,10 @@ def images_annotations_info(maskpath):
         for mask_image in glob.glob(os.path.join(maskpath, category, "*.tif")):
             original_file_name = os.path.basename(mask_image).split(".")[0] + ".jpg"
             mask_image_open = cv2.imread(mask_image)
-            w, h, c = mask_image_open.shape
+            height, width, c = mask_image_open.shape
 
             if original_file_name not in map(lambda img: img['file_name'], images):
-                image = create_image_annotation(original_file_name, w, h)
+                image = create_image_annotation(file_name=original_file_name, width=width, height=height)
                 images.append(image)
             else:
                 image = [element for element in images if element['file_name'] == original_file_name][0]
@@ -36,8 +35,9 @@ def images_annotations_info(maskpath):
 
             for contour in contours:
                 annotation = create_annotation_format(contour, image['id'], category_ids[category], annotation_id)
-                annotations.append(annotation)
-                annotation_id += 1
+                if annotation['area'] > 0:
+                    annotations.append(annotation)
+                    annotation_id += 1
 
     return images, annotations, annotation_id
 
