@@ -2,15 +2,18 @@ import glob
 import json
 import os
 
-from src.create_annotations import *
+import cv2
+
+from src.create_annotations import (create_image_annotation, create_annotation_format, find_contours,
+                                    get_coco_json_format, create_category_annotation)
 
 # Label ids of the dataset
 category_ids = {
-    "EX": 1,
-    "HE": 2,
-    "SE": 3,
-    "MA": 4,
+    "circle": 1,
+    "rectangle": 2,
 }
+
+MASK_TYPE = 'png'
 
 
 # Get "images" and "annotations" info
@@ -20,8 +23,8 @@ def images_annotations_info(maskpath):
     images = []
 
     for category in category_ids.keys():
-        for mask_image in glob.glob(os.path.join(maskpath, category, "*.tif")):
-            original_file_name = os.path.basename(mask_image).split(".")[0] + ".jpg"
+        for mask_image in glob.glob(os.path.join(maskpath, category, f'*.{MASK_TYPE}')):
+            original_file_name = f'{os.path.basename(mask_image).split(".")[0]}.{MASK_TYPE}'
             mask_image_open = cv2.imread(mask_image)
             height, width, c = mask_image_open.shape
 
@@ -43,8 +46,7 @@ def images_annotations_info(maskpath):
 
 
 if __name__ == "__main__":
-    # Get the standard COCO JSON format
-    coco_format = get_coco_json_format()
+    coco_format = get_coco_json_format()  # Get the standard COCO JSON format
 
     for keyword in ["valid", "test", "train"]:
         mask_path = "dataset/{}_mask/".format(keyword)
@@ -56,6 +58,6 @@ if __name__ == "__main__":
         coco_format["images"], coco_format["annotations"], annotation_cnt = images_annotations_info(mask_path)
 
         with open("output/{}.json".format(keyword), "w") as outfile:
-            json.dump(coco_format, outfile)
+            json.dump(coco_format, outfile, sort_keys=True, indent=4)
 
         print("Created %d annotations for images in folder: %s" % (annotation_cnt, mask_path))

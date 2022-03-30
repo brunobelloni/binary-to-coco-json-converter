@@ -13,7 +13,7 @@
       <excludeFolder url="file://$MODULE_DIR$/dataset/train" />
       <excludeFolder url="file://$MODULE_DIR$/dataset/train_mask" />
     </content>
-    <orderEntry type="jdk" jdkName="Python 3.8 (base) (2)" jdkType="Python SDK" />
+    <orderEntry type="jdk" jdkName="Python 3.10 (binary-to-coco-json-converter)" jdkType="Python SDK" />
     <orderEntry type="sourceFolder" forTests="false" />
   </component>
 </module>
