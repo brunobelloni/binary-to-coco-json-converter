@@ -13,7 +13,8 @@ category_ids = {
     "rectangle": 2,
 }
 
-MASK_TYPE = 'png'
+MASK_EXT = 'png'
+ORIGINAL_EXT = 'png'
 
 
 # Get "images" and "annotations" info
@@ -23,8 +24,8 @@ def images_annotations_info(maskpath):
     images = []
 
     for category in category_ids.keys():
-        for mask_image in glob.glob(os.path.join(maskpath, category, f'*.{MASK_TYPE}')):
-            original_file_name = f'{os.path.basename(mask_image).split(".")[0]}.{MASK_TYPE}'
+        for mask_image in glob.glob(os.path.join(maskpath, category, f'*.{MASK_EXT}')):
+            original_file_name = f'{os.path.basename(mask_image).split(".")[0]}.{ORIGINAL_EXT}'
             mask_image_open = cv2.imread(mask_image)
             height, width, c = mask_image_open.shape
 
@@ -49,7 +50,7 @@ if __name__ == "__main__":
     coco_format = get_coco_json_format()  # Get the standard COCO JSON format
 
     for keyword in ["valid", "test", "train"]:
-        mask_path = "dataset/{}_mask/".format(keyword)
+        mask_path = f"dataset/{keyword}_mask/"
 
         # Create category section
         coco_format["categories"] = create_category_annotation(category_ids)
@@ -57,7 +58,7 @@ if __name__ == "__main__":
         # Create images and annotations sections
         coco_format["images"], coco_format["annotations"], annotation_cnt = images_annotations_info(mask_path)
 
-        with open("output/{}.json".format(keyword), "w") as outfile:
+        with open(f"output/{keyword}.json", "w") as outfile:
             json.dump(coco_format, outfile, sort_keys=True, indent=4)
 
         print("Created %d annotations for images in folder: %s" % (annotation_cnt, mask_path))
